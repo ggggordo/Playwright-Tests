@@ -1,0 +1,19 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",  // O ES6, dependiendo de tu preferencia
+    "module": "CommonJS",
+    "strict": true, // Activar el modo estricto para un código robusto
+    "moduleResolution": "node",
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "isolatedModules": true,
+    "outDir": "./dist",  // Directorio de salida de los archivos compilados
+    "baseUrl": "./",
+    "paths": {
+      "@pages/*": ["src/pages/*"]  // Alias para rutas, si lo necesitas
+    }
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist"]
+}

@@ -2,28 +2,30 @@ import { Page } from '@playwright/test';
 
 export class LoginPage {
   readonly page: Page;
-  readonly usernameInput = '#userName';   // Selector de Username
-  readonly passwordInput = '#password';   // Selector de Password
-  readonly loginButton = '#login';        // Selector del botón Login
-  readonly errorMessage = '<p id="name" class="mb-1" style="color: red;">Invalid username or password!</p>"]'; // Selector del mensaje de error
+  readonly errorMessage: string;
 
   constructor(page: Page) {
     this.page = page;
+    this.errorMessage = '#name'; // Usar un selector CSS válido
   }
 
   async navigateToLoginPage() {
-    await this.page.goto('https://demoqa.com/login'); 
+    await this.page.goto('https://demoqa.com/login', { timeout: 60000, waitUntil: 'networkidle' });
   }
 
   async login(username: string, password: string) {
-    await this.page.fill(this.usernameInput, username);
-    await this.page.fill(this.passwordInput, password);
-    await this.page.click(this.loginButton);
+    await this.page.fill('#userName', username);
+    await this.page.fill('#password', password);
+    await this.page.click('#login');
   }
 
-  // Método para verificar si el mensaje de error es visible
   async isErrorMessageVisible(): Promise<boolean> {
-    await this.page.waitForSelector(this.errorMessage, { timeout: 5000 }); // Espera hasta 5 segundos
+    await this.page.waitForSelector(this.errorMessage, { timeout: 5000 });
     return this.page.isVisible(this.errorMessage);
+  }
+
+  async getErrorMessage(): Promise<string | null> {
+    await this.page.waitForSelector(this.errorMessage, { timeout: 5000 });
+    return this.page.textContent(this.errorMessage);
   }
 }

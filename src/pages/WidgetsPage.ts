@@ -1,70 +1,45 @@
 import { Page } from '@playwright/test';
-import { widgetsSelectors } from '../selectors/widgetsSelectors';
+import widgetsSelectors from '../selectors/widgetsSelectors'; // Actualiza la ruta si es necesario
 
 export class WidgetsPage {
-  readonly page: Page;
-  readonly selectors = widgetsSelectors;
+  constructor(private page: Page) {}
 
-  constructor(page: Page) {
-    this.page = page;
+  async navigateToSlider() {
+    await this.page.goto('https://demoqa.com/slider'); // Navega a la sección del slider
   }
 
-  // Navegar a Date Picker
-  async goToDatePicker() {
-    await this.page.goto('https://demoqa.com/date-picker');
+  async moveSliderTo(value: number) {
+    const sliderHandle = this.page.locator(widgetsSelectors.sliderHandle);
+
+    // Esperar a que el slider sea visible y pueda ser interactuado
+    await sliderHandle.waitFor({ state: 'visible' });
+
+    // Establecer el valor del slider directamente
+    await sliderHandle.evaluate((slider, value) => {
+      (slider as HTMLInputElement).value = value.toString();
+      slider.dispatchEvent(new Event('input'));
+      slider.dispatchEvent(new Event('change'));
+    }, value);
+
+    // Obtener el valor del slider después de moverlo
+    const sliderValue = await sliderHandle.evaluate(el => parseFloat((el as HTMLInputElement).value));
+
+    return sliderValue;
   }
 
-  // Seleccionar una fecha en el Date Picker
-  async selectDate(date: string) {
-    await this.page.fill(this.selectors.datePickerInput, date);
-  }
-
-  // Navegar a Progress Bar
-  async goToProgressBar() {
-    await this.page.goto('https://demoqa.com/progress-bar');
-  }
-
-  // Iniciar la Progress Bar y esperar a que llegue al 100%
-  async startProgressBarAndWait() {
-    await this.page.click(this.selectors.progressBarStartButton);
-    await this.page.waitForSelector(this.selectors.progressBarComplete, { timeout: 15000 });
-  }
-
-  // Navegar a Slider
-  async goToSlider() {
-    await this.page.goto('https://demoqa.com/slider');
-  }
-
-  // Mover el Slider a una posición determinada
-  async moveSliderTo(position: number) {
-    const sliderHandle = this.page.locator(this.selectors.sliderHandle);
-    const sliderValueSelector = 'input#sliderValue'; // O el selector del valor visible
-    
-    const boundingBox = await sliderHandle.boundingBox();
-    if (boundingBox) {
-      const startX = boundingBox.x + boundingBox.width / 2;
-      const moveX = startX + ((position / 100) * boundingBox.width) - startX;
-      
-      // Mueve el mouse sobre el slider
-      await this.page.mouse.move(startX, boundingBox.y + boundingBox.height / 2);
-      await this.page.mouse.down();
-      await this.page.mouse.move(moveX, boundingBox.y + boundingBox.height / 2);
-      await this.page.mouse.up();
-  
-      // Verifica el valor después de mover el slider
-      const sliderValue = await this.page.inputValue(sliderValueSelector);
-      return Number(sliderValue);  // Devuelve el valor actual del slider
-    }
-    throw new Error('Unable to move the slider');
-  }  
-
-  // Navegar a Tool Tips
   async goToToolTips() {
-    await this.page.goto('https://demoqa.com/tool-tips');
+    await this.page.goto('https://demoqa.com/tool-tips'); // Navegar a la sección Tool Tips
   }
 
-  // Hover sobre el botón para mostrar el tooltip
-  async hoverOverTooltipButton() {
-    await this.page.hover(this.selectors.toolTipButton);
+  async hoverOverButton() {
+    await this.page.locator(widgetsSelectors.toolTipsButton).hover();
   }
+
+  async getToolTipText() {
+    const toolTip = this.page.locator(widgetsSelectors.toolTipsText);
+    await toolTip.waitFor({ state: 'visible', timeout: 5000 }); // Esperar a que el tooltip sea visible
+    return toolTip.innerText();
+  }
+
+  // Agrega métodos para interactuar con Date Picker y Progress Bar si es necesario
 }

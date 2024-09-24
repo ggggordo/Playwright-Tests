@@ -1,42 +1,50 @@
 import { test, expect } from '@playwright/test';
 import { WebTablesPage } from '../pages/WebTablesPage';
 
-test.describe('Pruebas automatizadas en Web Tables', () => {
-  let webTablesPage: WebTablesPage;
-  const firstName = 'Juan';
-  const lastName = 'Perez';
-  const email = 'juan.perez@example.com';
-  const age = '30';
-  const salary = '50000';
-  const department = 'IT';
-  const newAge = '35';
-  const newSalary = '60000';
+let webTablesPage: WebTablesPage;
 
-  test.beforeEach(async ({ page }) => {
+test.beforeEach(async ({ page }) => {
     webTablesPage = new WebTablesPage(page);
+    console.log('Navegando a la sección de Web Tables');
     await webTablesPage.navigateToWebTables();
-  });
+});
 
-  test('Agregar, editar y eliminar un registro en la tabla', async ({ page }) => {
-    // Agregar nuevo registro
+test.only('Agregar, editar y eliminar un registro en la tabla', async ({ page }) => {
+    const firstName = 'Cierra';
+    const lastName = 'Vega';
+    const email = 'cierra@example.com';
+    const age = '39';
+    const salary = '10000';
+    const department = 'Insurance';
+    const newAge = '40';
+    const newSalary = '12000';
+
+    // Agregar un nuevo registro
+    console.log(`Agregando un nuevo registro con nombre: ${firstName} ${lastName}`);
     await webTablesPage.addNewRecord(firstName, lastName, email, age, salary, department);
-    
+
     // Validar que el registro fue agregado
-    const isRecordAdded = await webTablesPage.validateNewRecord(firstName, lastName, email);
+    console.log('Esperando a que la tabla se actualice');
+    await page.waitForTimeout(2000); // Esperar a que la tabla se actualice
+    console.log('Validando que el registro fue agregado correctamente');
+    const isRecordAdded = await webTablesPage.validateNewRecord(firstName, lastName, email, age, salary, department);
     expect(isRecordAdded).toBe(true);
 
     // Editar el registro
-    await webTablesPage.editFirstRecord(newAge, newSalary);
-    
+    console.log(`Editando el registro de ${firstName} ${lastName}`);
+    await webTablesPage.editFirstRecord(firstName, lastName, newAge, newSalary);
+
     // Validar que el registro fue editado correctamente
-    const isEdited = await webTablesPage.validateNewRecord(firstName, lastName, email);
+    console.log('Validando que el registro fue editado correctamente');
+    const isEdited = await webTablesPage.validateNewRecord(firstName, lastName, email, newAge, newSalary, department);
     expect(isEdited).toBe(true);
 
     // Eliminar el registro
-    await webTablesPage.deleteFirstRecord();
-    
+    console.log(`Eliminando el registro de ${firstName} ${lastName}`);
+    await webTablesPage.deleteFirstRecord(firstName, lastName);
+
     // Validar que el registro fue eliminado
-    const isDeleted = await webTablesPage.isRecordDeleted(firstName, lastName);
+    console.log('Validando que el registro fue eliminado correctamente');
+    const isDeleted = await webTablesPage.validateRecordDeleted(firstName, lastName);
     expect(isDeleted).toBe(true);
-  });
 });
